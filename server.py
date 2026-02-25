@@ -12,14 +12,18 @@ def home():
 @app.route("/emotionDetector", methods=["GET", "POST"])
 def emotion_detector_route():
     """Analyze input text and return emotion analysis."""
-    # O front (mywebscript.js) envia via GET usando textToAnalyze
+    # GET (do front): /emotionDetector?textToAnalyze=...
     text_to_analyze = request.args.get("textToAnalyze")
 
-    # Se alguém enviar via POST (opcional), pegamos também
+    # POST (opcional)
     if text_to_analyze is None:
         text_to_analyze = request.form.get("textToAnalyze", "")
 
     result = emotion_detector(text_to_analyze)
+
+    if result.get("dominant_emotion") is None:
+        return "Invalid text! Please try again!"
+
     return result
 
 if __name__ == "__main__":

@@ -9,9 +9,30 @@ def emotion_detector(text_to_analyze):
 
     response = requests.post(url, json=payload, headers=headers, timeout=30)
 
+    # Tarefa 7a: se a API retornar 400 (texto inválido/vazio), devolve None em tudo
+    if response.status_code == 400:
+        return {
+            "anger": None,
+            "disgust": None,
+            "fear": None,
+            "joy": None,
+            "sadness": None,
+            "dominant_emotion": None
+        }
+
     data = json.loads(response.text)
 
-    # Estrutura típica do retorno: você vai navegar até o bloco de emoções
+    # Proteção extra: se não vier o formato esperado, não deixa quebrar
+    if "emotionPredictions" not in data:
+        return {
+            "anger": None,
+            "disgust": None,
+            "fear": None,
+            "joy": None,
+            "sadness": None,
+            "dominant_emotion": None
+        }
+
     emotions = data["emotionPredictions"][0]["emotion"]
 
     anger = emotions["anger"]
@@ -20,10 +41,15 @@ def emotion_detector(text_to_analyze):
     joy = emotions["joy"]
     sadness = emotions["sadness"]
 
-    dominant_emotion = max(
-        {"anger": anger, "disgust": disgust, "fear": fear, "joy": joy, "sadness": sadness},
-        key=lambda k: {"anger": anger, "disgust": disgust, "fear": fear, "joy": joy, "sadness": sadness}[k]
-    )
+    scores = {
+        "anger": anger,
+        "disgust": disgust,
+        "fear": fear,
+        "joy": joy,
+        "sadness": sadness
+    }
+
+    dominant_emotion = max(scores, key=scores.get)
 
     return {
         "anger": anger,
